@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bet Tracker Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+  </style>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'cricket': '#1e40af',
+            'tennis': '#10b981',
+            'soccer': '#d97706',
+            'darts': '#7c3aed',
+            'snooker': '#059669',
+            'volleyball': '#dc2626',
+            'basketball': '#ea580c',
+            'ice-hockey': '#0284c7',
+            'league-of-legends': '#92400e',
+            'valorant': '#f43f5e',
+            'dota2': '#6d28d9',
+            'fifa': '#0e7490',
+            'nba2k': '#c2410c',
+            'ecricket': '#1d4ed8',
+            'king-of-persia': '#7e22ce',
+            'f1': '#b91c1c'
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-gray-900 text-white p-6">
+  <div class="max-w-6xl mx-auto">
+    <!-- Top Fields -->
+    <div class="flex flex-wrap justify-center gap-4 mb-6">
+      <div class="bg-gray-800 p-4 rounded w-full sm:w-auto text-center">
+        <h2 class="text-lg font-semibold">Total Bet Profit</h2>
+        <p id="totalProfit" class="text-xl">₹0</p>
+      </div>
+      <div class="bg-gray-800 p-4 rounded w-full sm:w-auto text-center">
+        <h2 class="text-lg font-semibold flex justify-center items-center">
+          Total Deposit
+          <button onclick="openDepositPopup()" class="text-sm text-blue-400 ml-2">Log</button>
+        </h2>
+        <p id="totalDeposit" class="text-xl">₹0</p>
+      </div>
+      <div class="bg-gray-800 p-4 rounded w-full sm:w-auto text-center">
+        <h2 class="text-lg font-semibold">Actual Profit</h2>
+        <p id="actualProfit" class="text-xl">₹0</p>
+      </div>
+      <div class="bg-gray-800 p-4 rounded w-full sm:w-auto text-center">
+        <h2 class="text-lg font-semibold">Total Bets</h2>
+        <p id="totalBets" class="text-xl">0</p>
+      </div>
+      <div class="bg-gray-800 p-4 rounded w-full sm:w-auto text-center">
+        <h2 class="text-lg font-semibold">Export Data</h2>
+        <button onclick="exportToCSV()" class="mt-1 bg-green-600 px-3 py-1 rounded text-sm">Download CSV</button>
+      </div>
+    </div>
+
+    <!-- Bet Form -->
+    <div class="bg-gray-800 p-4 rounded mb-6">
+      <h2 class="text-xl font-semibold mb-4">Add Bet Ticket</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <input id="match" placeholder="Match" class="px-3 py-2 rounded bg-gray-700 placeholder-gray-400">
+        <input id="winner" placeholder="Winner" class="px-3 py-2 rounded bg-gray-700 placeholder-gray-400">
+        <input id="date" type="date" class="px-3 py-2 rounded bg-gray-700">
+        <select id="sport" class="px-3 py-2 rounded bg-gray-700">
+          <option value="Cricket">Cricket</option>
+          <option value="Tennis">Tennis</option>
+          <option value="Soccer">Soccer</option>
+          <option value="Darts">Darts</option>
+          <option value="Snooker">Snooker</option>
+          <option value="Volleyball">Volleyball</option>
+          <option value="Basketball">Basketball</option>
+          <option value="Ice Hockey">Ice Hockey</option>
+          <option value="League of Legends">League of Legends</option>
+          <option value="Valorant">Valorant</option>
+          <option value="Dota2">Dota2</option>
+          <option value="FIFA">FIFA</option>
+          <option value="NBA2K">NBA2K</option>
+          <option value="eCricket">eCricket</option>
+          <option value="King of Persia">King of Persia</option>
+          <option value="F1">F1</option>
+        </select>
+        <input id="odds" type="number" step="0.01" placeholder="Odds" class="px-3 py-2 rounded bg-gray-700 placeholder-gray-400">
+        <input id="stake" type="number" step="0.01" placeholder="Stake ₹" class="px-3 py-2 rounded bg-gray-700 placeholder-gray-400">
+        <input id="payout" type="number" step="0.01" placeholder="Payout ₹" class="px-3 py-2 rounded bg-gray-700 placeholder-gray-400">
+        <select id="result" class="px-3 py-2 rounded bg-gray-700">
+          <option value="Win">Win</option>
+          <option value="Loss">Loss</option>
+          <option value="Cashed Out">Cashed Out</option>
+        </select>
+      </div>
+      <button onclick="addBet()" class="mt-4 bg-blue-600 px-4 py-2 rounded">Add Ticket</button>
+    </div>
+
+    <!-- Deposit Popup -->
+    <div id="depositPopup" class="fixed inset-0 bg-black bg-opacity-50 hidden justify-center items-center">
+      <div class="bg-gray-800 p-6 rounded w-80">
+        <h2 class="text-xl mb-4">Log Deposit</h2>
+        <input id="depositDate" type="date" class="w-full mb-2 px-3 py-2 rounded bg-gray-700">
+        <input id="depositAmount" type="number" placeholder="Amount ₹" class="w-full mb-2 px-3 py-2 rounded bg-gray-700">
+        <button onclick="logDeposit()" class="bg-green-600 w-full py-2 rounded">Log Deposit</button>
+        <button onclick="closeDepositPopup()" class="mt-2 w-full py-2 rounded bg-red-600">Cancel</button>
+      </div>
+    </div>
+
+    <!-- Bet Tickets Output -->
+    <div id="betTickets"></div>
+  </div>
+
+  <script>
+    let betData = JSON.parse(localStorage.getItem('betData')) || {};
+    let depositData = JSON.parse(localStorage.getItem('depositData')) || [];
+
+    function formatMonthYear(dateStr) {
+      const [year, month] = dateStr.split("-");
+      const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+      return `${monthNames[parseInt(month) - 1]} ${year}`;
+    }
+
+    function formatDate(dateStr) {
+      const [year, month, day] = dateStr.split("-");
+      return `${day}/${month}/${year}`;
+    }
+
+    function getSportColor(sport) {
+      const sportMap = {
+        'Cricket': 'cricket',
+        'Tennis': 'tennis',
+        'Soccer': 'soccer',
+        'Darts': 'darts',
+        'Snooker': 'snooker',
+        'Volleyball': 'volleyball',
+        'Basketball': 'basketball',
+        'Ice Hockey': 'ice-hockey',
+        'League of Legends': 'league-of-legends',
+        'Valorant': 'valorant',
+        'Dota2': 'dota2',
+        'FIFA': 'fifa',
+        'NBA2K': 'nba2k',
+        'eCricket': 'ecricket',
+        'King of Persia': 'king-of-persia',
+        'F1': 'f1'
+      };
+      return sportMap[sport] || 'gray';
+    }
+
+    function getResultColor(result) {
+      return result === 'Win' ? 'text-green-500' : 
+             result === 'Loss' ? 'text-red-500' : 
+             'text-orange-500';
+    }
+
+    function addBet() {
+      const match = document.getElementById('match').value;
+      const date = document.getElementById('date').value;
+      const winner = document.getElementById('winner').value;
+      const sport = document.getElementById('sport').value;
+      const odds = parseFloat(document.getElementById('odds').value);
+      const stake = parseFloat(document.getElementById('stake').value);
+      const payout = parseFloat(document.getElementById('payout').value);
+      const result = document.getElementById('result').value;
+
+      if (!date || isNaN(stake) || isNaN(odds) || isNaN(payout)) {
+        alert("Fill all required fields correctly.");
+        return;
+      }
+
+      const profit = (payout - stake).toFixed(2);
+      const monthYear = formatMonthYear(date);
+
+      if (!betData[monthYear]) betData[monthYear] = {};
+      if (!betData[monthYear][date]) betData[monthYear][date] = [];
+
+      betData[monthYear][date].push({ match, winner, sport, odds, stake, payout: payout.toFixed(2), profit, result, date });
+
+      localStorage.setItem('betData', JSON.stringify(betData));
+      updateUI();
+    }
+
+    function logDeposit() {
+      const date = document.getElementById('depositDate').value;
+      const amount = parseFloat(document.getElementById('depositAmount').value);
+      if (!date || isNaN(amount)) {
+        alert("Fill all fields correctly.");
+        return;
+      }
+      depositData.push({ date, amount });
+      localStorage.setItem('depositData', JSON.stringify(depositData));
+      closeDepositPopup();
+      updateUI();
+    }
+
+    function openDepositPopup() {
+      document.getElementById('depositPopup').classList.remove('hidden');
+    }
+
+    function closeDepositPopup() {
+      document.getElementById('depositPopup').classList.add('hidden');
+    }
+
+    function exportToCSV() {
+      // Prepare CSV content
+      let csvContent = "Date,Match,Sport,Winner,Odds,Stake,Payout,Profit,Result\n";
+      
+      // Get all months sorted
+      const months = Object.keys(betData).sort((a, b) => new Date(`1 ${b}`) - new Date(`1 ${a}`));
+      
+      // Loop through all data
+      months.forEach(month => {
+        const dates = Object.keys(betData[month]).sort().reverse();
+        dates.forEach(date => {
+          betData[month][date].forEach(bet => {
+            csvContent += `"${date}","${bet.match}","${bet.sport}","${bet.winner}",${bet.odds},${bet.stake},${bet.payout},${bet.profit},"${bet.result}"\n`;
+          });
+        });
+      });
+      
+      // Create download link
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `betting_data_${new Date().toISOString().slice(0,10)}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function updateUI() {
+      const container = document.getElementById('betTickets');
+      container.innerHTML = '';
+      let totalProfit = 0;
+      let totalBetsCount = 0;
+      const months = Object.keys(betData).sort((a, b) => new Date(`1 ${b}`) - new Date(`1 ${a}`));
+
+      months.forEach(month => {
+        let monthProfit = 0;
+        let monthBetsCount = 0;
+        const monthDiv = document.createElement('div');
+        monthDiv.className = 'mb-8';
+        const title = document.createElement('h2');
+        title.className = 'text-2xl font-bold mb-2';
+        title.textContent = `${month}`;
+
+        const monthStats = document.createElement('div');
+        monthStats.className = 'flex gap-4 mb-4';
+        
+        const monthProfitEl = document.createElement('div');
+        monthProfitEl.className = 'text-green-400';
+        
+        const monthBetsEl = document.createElement('div');
+        monthBetsEl.className = 'text-blue-400';
+
+        const dates = Object.keys(betData[month]).sort().reverse();
+        const list = document.createElement('div');
+
+        dates.forEach(date => {
+          let dayProfit = 0;
+          let dayBetsCount = 0;
+          const bets = betData[month][date];
+          const dayGroup = document.createElement('div');
+          dayGroup.className = 'mb-4';
+          const dayHeader = document.createElement('h3');
+          dayHeader.className = 'text-xl mb-1';
+          dayHeader.textContent = `${formatDate(date)} (${bets.length} bets)`;
+          const cards = document.createElement('div');
+          cards.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4';
+
+          bets.forEach(bet => {
+            const card = document.createElement('div');
+            card.className = 'bg-gray-800 rounded-lg p-4 shadow flex flex-col gap-1';
+            card.innerHTML = `
+              <div class="flex justify-between items-start">
+                <div class="text-lg font-bold">${bet.match}</div>
+                <span class="text-xs px-2 py-1 rounded-full bg-gray-700 text-${getSportColor(bet.sport)}-500">${bet.sport}</span>
+              </div>
+              <div class="flex justify-between text-sm">
+                <span>Winner: <span class="text-blue-400">${bet.winner}</span></span>
+                <span>Odds: ${bet.odds}</span>
+              </div>
+              <div class="flex justify-between text-sm">
+                <span>Stake: ₹${bet.stake}</span>
+                <span>Payout: ₹${bet.payout}</span>
+              </div>
+              <div class="flex justify-between text-sm">
+                <span class="${getResultColor(bet.result)}">Result: ${bet.result}</span>
+                <span class="font-semibold ${bet.profit >= 0 ? 'text-green-400' : 'text-red-400'}">Profit: ₹${bet.profit}</span>
+              </div>
+            `;
+            cards.appendChild(card);
+            dayProfit += parseFloat(bet.profit);
+            dayBetsCount++;
+          });
+
+          const dayStats = document.createElement('div');
+          dayStats.className = 'flex gap-4 mb-2';
+          
+          const dayProfitEl = document.createElement('div');
+          dayProfitEl.className = 'text-yellow-300 text-sm';
+          dayProfitEl.textContent = `Day Profit: ₹${dayProfit.toFixed(2)}`;
+          
+          const dayBetsEl = document.createElement('div');
+          dayBetsEl.className = 'text-blue-300 text-sm';
+          dayBetsEl.textContent = `Bets: ${dayBetsCount}`;
+
+          totalProfit += dayProfit;
+          monthProfit += dayProfit;
+          totalBetsCount += dayBetsCount;
+          monthBetsCount += dayBetsCount;
+
+          dayStats.appendChild(dayProfitEl);
+          dayStats.appendChild(dayBetsEl);
+          dayGroup.appendChild(dayHeader);
+          dayGroup.appendChild(dayStats);
+          dayGroup.appendChild(cards);
+          list.appendChild(dayGroup);
+        });
+
+        monthProfitEl.textContent = `Month Profit: ₹${monthProfit.toFixed(2)}`;
+        monthBetsEl.textContent = `Total Bets: ${monthBetsCount}`;
+        monthStats.appendChild(monthProfitEl);
+        monthStats.appendChild(monthBetsEl);
+        monthDiv.appendChild(title);
+        monthDiv.appendChild(monthStats);
+        monthDiv.appendChild(list);
+        container.appendChild(monthDiv);
+      });
+
+      const totalDeposit = depositData.reduce((sum, d) => sum + d.amount, 0);
+      document.getElementById('totalProfit').textContent = `₹${totalProfit.toFixed(2)}`;
+      document.getElementById('totalDeposit').textContent = `₹${totalDeposit.toFixed(2)}`;
+      document.getElementById('actualProfit').textContent = `₹${(totalProfit - totalDeposit).toFixed(2)}`;
+      document.getElementById('totalBets').textContent = `${totalBetsCount}`;
+    }
+
+    updateUI();
+  </script>
+</body>
+</html>
