@@ -5,10 +5,31 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Bet Tracker Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .main-content {
+      flex: 1;
+    }
+    .stat-card {
+      transition: all 0.3s ease;
+    }
+    .stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .bet-card {
+      transition: all 0.2s ease;
+    }
+    .bet-card:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     }
   </style>
   <script>
@@ -38,86 +59,154 @@
     }
   </script>
 </head>
-<body class="bg-gray-900 text-white p-6">
-  <div class="max-w-6xl mx-auto">
-    <!-- Top Fields -->
-    <div class="flex flex-wrap justify-center gap-4 mb-6">
-      <div class="bg-gray-800 p-4 rounded w-full sm:w-auto text-center">
-        <h2 class="text-lg font-semibold">Total Bet Profit</h2>
-        <p id="totalProfit" class="text-xl">₹0</p>
+<body class="bg-gray-900 text-white">
+  <div class="main-content p-6">
+    <div class="max-w-7xl mx-auto">
+      <!-- Header -->
+      <header class="mb-8">
+        <h1 class="text-3xl font-bold text-center mb-2 bg-gradient-to-r from-blue-400 to-green-400 bg-clip-text text-transparent">
+          <i class="fas fa-chart-line mr-2"></i>Bet Tracker Pro
+        </h1>
+        <p class="text-gray-400 text-center">Track your betting performance with precision</p>
+      </header>
+
+      <!-- Top Stats -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+        <div class="stat-card bg-gradient-to-br from-gray-800 to-gray-700 p-4 rounded-lg text-center">
+          <h2 class="text-sm font-semibold text-gray-300 mb-1">Total Bet Profit</h2>
+          <p id="totalProfit" class="text-2xl font-bold">₹0</p>
+        </div>
+        <div class="stat-card bg-gradient-to-br from-gray-800 to-gray-700 p-4 rounded-lg text-center">
+          <h2 class="text-sm font-semibold text-gray-300 mb-1 flex justify-center items-center">
+            Total Deposit
+            <button onclick="openDepositPopup()" class="text-xs text-blue-400 ml-2">
+              <i class="fas fa-plus-circle"></i>
+            </button>
+          </h2>
+          <p id="totalDeposit" class="text-2xl font-bold">₹0</p>
+        </div>
+        <div class="stat-card bg-gradient-to-br from-gray-800 to-gray-700 p-4 rounded-lg text-center">
+          <h2 class="text-sm font-semibold text-gray-300 mb-1">Actual Profit</h2>
+          <p id="actualProfit" class="text-2xl font-bold">₹0</p>
+        </div>
+        <div class="stat-card bg-gradient-to-br from-gray-800 to-gray-700 p-4 rounded-lg text-center">
+          <h2 class="text-sm font-semibold text-gray-300 mb-1">Total Bets</h2>
+          <p id="totalBets" class="text-2xl font-bold">0</p>
+        </div>
+        <div class="stat-card bg-gradient-to-br from-gray-800 to-gray-700 p-4 rounded-lg text-center flex flex-col justify-center">
+          <button onclick="exportToCSV()" class="bg-green-600 hover:bg-green-700 px-3 py-2 rounded-lg text-sm font-medium flex items-center justify-center">
+            <i class="fas fa-file-export mr-2"></i> Export CSV
+          </button>
+        </div>
       </div>
-      <div class="bg-gray-800 p-4 rounded w-full sm:w-auto text-center">
-        <h2 class="text-lg font-semibold flex justify-center items-center">
-          Total Deposit
-          <button onclick="openDepositPopup()" class="text-sm text-blue-400 ml-2">Log</button>
+
+      <!-- Bet Form -->
+      <div class="bg-gray-800 rounded-xl p-6 mb-8 border border-gray-700">
+        <h2 class="text-xl font-semibold mb-4 flex items-center">
+          <i class="fas fa-ticket-alt mr-2 text-blue-400"></i> Add New Bet
         </h2>
-        <p id="totalDeposit" class="text-xl">₹0</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-400 mb-1">Match</label>
+            <input id="match" placeholder="e.g. India vs Australia" class="w-full px-3 py-2 rounded-lg bg-gray-700 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-400 mb-1">Winner</label>
+            <input id="winner" placeholder="e.g. India" class="w-full px-3 py-2 rounded-lg bg-gray-700 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-400 mb-1">Date</label>
+            <input id="date" type="date" class="w-full px-3 py-2 rounded-lg bg-gray-700 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-400 mb-1">Sport</label>
+            <select id="sport" class="w-full px-3 py-2 rounded-lg bg-gray-700 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+              <option value="Cricket">Cricket</option>
+              <option value="Tennis">Tennis</option>
+              <option value="Soccer">Soccer</option>
+              <option value="Darts">Darts</option>
+              <option value="Snooker">Snooker</option>
+              <option value="Volleyball">Volleyball</option>
+              <option value="Basketball">Basketball</option>
+              <option value="Ice Hockey">Ice Hockey</option>
+              <option value="League of Legends">League of Legends</option>
+              <option value="Valorant">Valorant</option>
+              <option value="Dota2">Dota2</option>
+              <option value="FIFA">FIFA</option>
+              <option value="NBA2K">NBA2K</option>
+              <option value="eCricket">eCricket</option>
+              <option value="King of Persia">King of Persia</option>
+              <option value="F1">F1</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-400 mb-1">Odds</label>
+            <input id="odds" type="number" step="0.01" placeholder="e.g. 1.85" class="w-full px-3 py-2 rounded-lg bg-gray-700 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-400 mb-1">Stake (₹)</label>
+            <input id="stake" type="number" step="0.01" placeholder="e.g. 1000" class="w-full px-3 py-2 rounded-lg bg-gray-700 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-400 mb-1">Payout (₹)</label>
+            <input id="payout" type="number" step="0.01" placeholder="e.g. 1850" class="w-full px-3 py-2 rounded-lg bg-gray-700 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-400 mb-1">Result</label>
+            <select id="result" class="w-full px-3 py-2 rounded-lg bg-gray-700 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+              <option value="Win">Win</option>
+              <option value="Loss">Loss</option>
+              <option value="Cashed Out">Cashed Out</option>
+            </select>
+          </div>
+        </div>
+        <button onclick="addBet()" class="mt-6 bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg font-medium w-full sm:w-auto flex items-center justify-center">
+          <i class="fas fa-plus-circle mr-2"></i> Add Bet Ticket
+        </button>
       </div>
-      <div class="bg-gray-800 p-4 rounded w-full sm:w-auto text-center">
-        <h2 class="text-lg font-semibold">Actual Profit</h2>
-        <p id="actualProfit" class="text-xl">₹0</p>
-      </div>
-      <div class="bg-gray-800 p-4 rounded w-full sm:w-auto text-center">
-        <h2 class="text-lg font-semibold">Total Bets</h2>
-        <p id="totalBets" class="text-xl">0</p>
-      </div>
-      <div class="bg-gray-800 p-4 rounded w-full sm:w-auto text-center">
-        <h2 class="text-lg font-semibold">Export Data</h2>
-        <button onclick="exportToCSV()" class="mt-1 bg-green-600 px-3 py-1 rounded text-sm">Download CSV</button>
-      </div>
-    </div>
 
-    <!-- Bet Form -->
-    <div class="bg-gray-800 p-4 rounded mb-6">
-      <h2 class="text-xl font-semibold mb-4">Add Bet Ticket</h2>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <input id="match" placeholder="Match" class="px-3 py-2 rounded bg-gray-700 placeholder-gray-400">
-        <input id="winner" placeholder="Winner" class="px-3 py-2 rounded bg-gray-700 placeholder-gray-400">
-        <input id="date" type="date" class="px-3 py-2 rounded bg-gray-700">
-        <select id="sport" class="px-3 py-2 rounded bg-gray-700">
-          <option value="Cricket">Cricket</option>
-          <option value="Tennis">Tennis</option>
-          <option value="Soccer">Soccer</option>
-          <option value="Darts">Darts</option>
-          <option value="Snooker">Snooker</option>
-          <option value="Volleyball">Volleyball</option>
-          <option value="Basketball">Basketball</option>
-          <option value="Ice Hockey">Ice Hockey</option>
-          <option value="League of Legends">League of Legends</option>
-          <option value="Valorant">Valorant</option>
-          <option value="Dota2">Dota2</option>
-          <option value="FIFA">FIFA</option>
-          <option value="NBA2K">NBA2K</option>
-          <option value="eCricket">eCricket</option>
-          <option value="King of Persia">King of Persia</option>
-          <option value="F1">F1</option>
-        </select>
-        <input id="odds" type="number" step="0.01" placeholder="Odds" class="px-3 py-2 rounded bg-gray-700 placeholder-gray-400">
-        <input id="stake" type="number" step="0.01" placeholder="Stake ₹" class="px-3 py-2 rounded bg-gray-700 placeholder-gray-400">
-        <input id="payout" type="number" step="0.01" placeholder="Payout ₹" class="px-3 py-2 rounded bg-gray-700 placeholder-gray-400">
-        <select id="result" class="px-3 py-2 rounded bg-gray-700">
-          <option value="Win">Win</option>
-          <option value="Loss">Loss</option>
-          <option value="Cashed Out">Cashed Out</option>
-        </select>
+      <!-- Deposit Popup -->
+      <div id="depositPopup" class="fixed inset-0 bg-black bg-opacity-70 hidden justify-center items-center z-50">
+        <div class="bg-gray-800 rounded-xl p-6 w-full max-w-md border border-gray-700">
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold">
+              <i class="fas fa-money-bill-wave mr-2 text-green-400"></i> Log Deposit
+            </h2>
+            <button onclick="closeDepositPopup()" class="text-gray-400 hover:text-white">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-400 mb-1">Date</label>
+            <input id="depositDate" type="date" class="w-full px-3 py-2 rounded-lg bg-gray-700 focus:ring-2 focus:ring-green-500 focus:outline-none">
+          </div>
+          <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-400 mb-1">Amount (₹)</label>
+            <input id="depositAmount" type="number" placeholder="e.g. 5000" class="w-full px-3 py-2 rounded-lg bg-gray-700 placeholder-gray-500 focus:ring-2 focus:ring-green-500 focus:outline-none">
+          </div>
+          <div class="flex gap-3">
+            <button onclick="logDeposit()" class="flex-1 bg-green-600 hover:bg-green-700 py-3 rounded-lg font-medium">
+              <i class="fas fa-check mr-2"></i> Confirm
+            </button>
+            <button onclick="closeDepositPopup()" class="flex-1 bg-gray-700 hover:bg-gray-600 py-3 rounded-lg font-medium">
+              <i class="fas fa-times mr-2"></i> Cancel
+            </button>
+          </div>
+        </div>
       </div>
-      <button onclick="addBet()" class="mt-4 bg-blue-600 px-4 py-2 rounded">Add Ticket</button>
-    </div>
 
-    <!-- Deposit Popup -->
-    <div id="depositPopup" class="fixed inset-0 bg-black bg-opacity-50 hidden justify-center items-center">
-      <div class="bg-gray-800 p-6 rounded w-80">
-        <h2 class="text-xl mb-4">Log Deposit</h2>
-        <input id="depositDate" type="date" class="w-full mb-2 px-3 py-2 rounded bg-gray-700">
-        <input id="depositAmount" type="number" placeholder="Amount ₹" class="w-full mb-2 px-3 py-2 rounded bg-gray-700">
-        <button onclick="logDeposit()" class="bg-green-600 w-full py-2 rounded">Log Deposit</button>
-        <button onclick="closeDepositPopup()" class="mt-2 w-full py-2 rounded bg-red-600">Cancel</button>
-      </div>
+      <!-- Bet Tickets Output -->
+      <div id="betTickets"></div>
     </div>
-
-    <!-- Bet Tickets Output -->
-    <div id="betTickets"></div>
   </div>
+
+  <!-- Footer -->
+  <footer class="bg-gray-800 py-4 border-t border-gray-700">
+    <div class="max-w-7xl mx-auto px-6 text-center text-gray-400 text-sm">
+      Made with <span class="text-red-500"><i class="fas fa-heart"></i></span> by 
+      <a href="https://github.com/ventikaa" target="_blank" class="text-blue-400 hover:text-blue-300 font-medium">ventikaa</a>
+    </div>
+  </footer>
 
   <script>
     let betData = JSON.parse(localStorage.getItem('betData')) || {};
@@ -162,6 +251,12 @@
              'text-orange-500';
     }
 
+    function getResultBgColor(result) {
+      return result === 'Win' ? 'bg-green-900/30' : 
+             result === 'Loss' ? 'bg-red-900/30' : 
+             'bg-orange-900/30';
+    }
+
     function addBet() {
       const match = document.getElementById('match').value;
       const date = document.getElementById('date').value;
@@ -173,7 +268,7 @@
       const result = document.getElementById('result').value;
 
       if (!date || isNaN(stake) || isNaN(odds) || isNaN(payout)) {
-        alert("Fill all required fields correctly.");
+        alert("Please fill all required fields correctly.");
         return;
       }
 
@@ -183,7 +278,24 @@
       if (!betData[monthYear]) betData[monthYear] = {};
       if (!betData[monthYear][date]) betData[monthYear][date] = [];
 
-      betData[monthYear][date].push({ match, winner, sport, odds, stake, payout: payout.toFixed(2), profit, result, date });
+      betData[monthYear][date].push({ 
+        match, 
+        winner, 
+        sport, 
+        odds, 
+        stake, 
+        payout: payout.toFixed(2), 
+        profit, 
+        result, 
+        date 
+      });
+
+      // Clear form fields
+      document.getElementById('match').value = '';
+      document.getElementById('winner').value = '';
+      document.getElementById('odds').value = '';
+      document.getElementById('stake').value = '';
+      document.getElementById('payout').value = '';
 
       localStorage.setItem('betData', JSON.stringify(betData));
       updateUI();
@@ -193,10 +305,14 @@
       const date = document.getElementById('depositDate').value;
       const amount = parseFloat(document.getElementById('depositAmount').value);
       if (!date || isNaN(amount)) {
-        alert("Fill all fields correctly.");
+        alert("Please fill all fields correctly.");
         return;
       }
       depositData.push({ date, amount });
+      // Clear form fields
+      document.getElementById('depositDate').value = '';
+      document.getElementById('depositAmount').value = '';
+      
       localStorage.setItem('depositData', JSON.stringify(depositData));
       closeDepositPopup();
       updateUI();
@@ -204,6 +320,8 @@
 
     function openDepositPopup() {
       document.getElementById('depositPopup').classList.remove('hidden');
+      // Set today's date as default
+      document.getElementById('depositDate').value = new Date().toISOString().split('T')[0];
     }
 
     function closeDepositPopup() {
@@ -211,6 +329,11 @@
     }
 
     function exportToCSV() {
+      if (Object.keys(betData).length === 0) {
+        alert("No bet data available to export.");
+        return;
+      }
+
       // Prepare CSV content
       let csvContent = "Date,Match,Sport,Winner,Odds,Stake,Payout,Profit,Result\n";
       
@@ -222,7 +345,7 @@
         const dates = Object.keys(betData[month]).sort().reverse();
         dates.forEach(date => {
           betData[month][date].forEach(bet => {
-            csvContent += `"${date}","${bet.match}","${bet.sport}","${bet.winner}",${bet.odds},${bet.stake},${bet.payout},${bet.profit},"${bet.result}"\n`;
+            csvContent += `"${date}","${bet.match.replace(/"/g, '""')}","${bet.sport}","${bet.winner.replace(/"/g, '""')}",${bet.odds},${bet.stake},${bet.payout},${bet.profit},"${bet.result}"\n`;
           });
         });
       });
@@ -246,23 +369,45 @@
       let totalBetsCount = 0;
       const months = Object.keys(betData).sort((a, b) => new Date(`1 ${b}`) - new Date(`1 ${a}`));
 
+      if (months.length === 0) {
+        container.innerHTML = `
+          <div class="bg-gray-800 rounded-xl p-8 text-center border border-gray-700">
+            <i class="fas fa-ticket-alt text-4xl text-gray-600 mb-4"></i>
+            <h3 class="text-xl font-medium text-gray-300 mb-2">No bets recorded yet</h3>
+            <p class="text-gray-500">Add your first bet to get started</p>
+          </div>
+        `;
+      }
+
       months.forEach(month => {
         let monthProfit = 0;
         let monthBetsCount = 0;
         const monthDiv = document.createElement('div');
-        monthDiv.className = 'mb-8';
+        monthDiv.className = 'mb-12';
+        
         const title = document.createElement('h2');
-        title.className = 'text-2xl font-bold mb-2';
-        title.textContent = `${month}`;
+        title.className = 'text-2xl font-bold mb-4 flex items-center';
+        title.innerHTML = `
+          <i class="fas fa-calendar-alt mr-3 text-blue-400"></i>
+          ${month}
+        `;
 
         const monthStats = document.createElement('div');
-        monthStats.className = 'flex gap-4 mb-4';
+        monthStats.className = 'flex flex-wrap gap-4 mb-6';
         
         const monthProfitEl = document.createElement('div');
-        monthProfitEl.className = 'text-green-400';
+        monthProfitEl.className = 'bg-gray-800 rounded-lg px-4 py-3 border border-gray-700';
+        monthProfitEl.innerHTML = `
+          <div class="text-sm text-gray-400">Month Profit</div>
+          <div class="text-xl font-bold ${monthProfit >= 0 ? 'text-green-400' : 'text-red-400'}">₹0.00</div>
+        `;
         
         const monthBetsEl = document.createElement('div');
-        monthBetsEl.className = 'text-blue-400';
+        monthBetsEl.className = 'bg-gray-800 rounded-lg px-4 py-3 border border-gray-700';
+        monthBetsEl.innerHTML = `
+          <div class="text-sm text-gray-400">Total Bets</div>
+          <div class="text-xl font-bold text-blue-400">0</div>
+        `;
 
         const dates = Object.keys(betData[month]).sort().reverse();
         const list = document.createElement('div');
@@ -272,32 +417,70 @@
           let dayBetsCount = 0;
           const bets = betData[month][date];
           const dayGroup = document.createElement('div');
-          dayGroup.className = 'mb-4';
+          dayGroup.className = 'mb-8';
+          
           const dayHeader = document.createElement('h3');
-          dayHeader.className = 'text-xl mb-1';
-          dayHeader.textContent = `${formatDate(date)} (${bets.length} bets)`;
+          dayHeader.className = 'text-lg font-semibold mb-3 flex items-center';
+          dayHeader.innerHTML = `
+            <i class="fas fa-calendar-day mr-2 text-gray-400"></i>
+            ${formatDate(date)} 
+            <span class="ml-2 px-2 py-1 rounded-full text-xs bg-gray-700 text-blue-400">${bets.length} bets</span>
+          `;
+
+          const dayStats = document.createElement('div');
+          dayStats.className = 'flex flex-wrap gap-3 mb-4';
+          
+          const dayProfitEl = document.createElement('div');
+          dayProfitEl.className = 'bg-gray-800 rounded-lg px-3 py-2 border border-gray-700';
+          dayProfitEl.innerHTML = `
+            <div class="text-xs text-gray-400">Day Profit</div>
+            <div class="text-lg font-medium ${dayProfit >= 0 ? 'text-green-400' : 'text-red-400'}">₹0.00</div>
+          `;
+          
+          const dayBetsEl = document.createElement('div');
+          dayBetsEl.className = 'bg-gray-800 rounded-lg px-3 py-2 border border-gray-700';
+          dayBetsEl.innerHTML = `
+            <div class="text-xs text-gray-400">Bets</div>
+            <div class="text-lg font-medium text-blue-400">0</div>
+          `;
+
           const cards = document.createElement('div');
           cards.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4';
 
           bets.forEach(bet => {
             const card = document.createElement('div');
-            card.className = 'bg-gray-800 rounded-lg p-4 shadow flex flex-col gap-1';
+            card.className = `bet-card bg-gray-800 rounded-xl p-4 border ${getResultBgColor(bet.result)} border-gray-700`;
             card.innerHTML = `
-              <div class="flex justify-between items-start">
-                <div class="text-lg font-bold">${bet.match}</div>
-                <span class="text-xs px-2 py-1 rounded-full bg-gray-700 text-${getSportColor(bet.sport)}-500">${bet.sport}</span>
+              <div class="flex justify-between items-start mb-2">
+                <div class="text-lg font-bold truncate">${bet.match}</div>
+                <span class="text-xs px-2 py-1 rounded-full bg-gray-700 text-${getSportColor(bet.sport)}-500 flex-shrink-0">
+                  ${bet.sport}
+                </span>
               </div>
-              <div class="flex justify-between text-sm">
-                <span>Winner: <span class="text-blue-400">${bet.winner}</span></span>
-                <span>Odds: ${bet.odds}</span>
+              <div class="flex justify-between text-sm mb-1">
+                <span class="text-gray-400">Winner:</span>
+                <span class="text-blue-400 font-medium">${bet.winner}</span>
               </div>
-              <div class="flex justify-between text-sm">
-                <span>Stake: ₹${bet.stake}</span>
-                <span>Payout: ₹${bet.payout}</span>
+              <div class="flex justify-between text-sm mb-1">
+                <span class="text-gray-400">Odds:</span>
+                <span>${bet.odds}</span>
               </div>
-              <div class="flex justify-between text-sm">
-                <span class="${getResultColor(bet.result)}">Result: ${bet.result}</span>
-                <span class="font-semibold ${bet.profit >= 0 ? 'text-green-400' : 'text-red-400'}">Profit: ₹${bet.profit}</span>
+              <div class="flex justify-between text-sm mb-1">
+                <span class="text-gray-400">Stake:</span>
+                <span>₹${bet.stake}</span>
+              </div>
+              <div class="flex justify-between text-sm mb-1">
+                <span class="text-gray-400">Payout:</span>
+                <span>₹${bet.payout}</span>
+              </div>
+              <div class="mt-3 pt-3 border-t border-gray-700 flex justify-between items-center">
+                <span class="${getResultColor(bet.result)} font-medium">
+                  <i class="fas ${bet.result === 'Win' ? 'fa-check-circle' : bet.result === 'Loss' ? 'fa-times-circle' : 'fa-exchange-alt'} mr-1"></i>
+                  ${bet.result}
+                </span>
+                <span class="font-semibold ${bet.profit >= 0 ? 'text-green-400' : 'text-red-400'}">
+                  ${bet.profit >= 0 ? '+' : ''}₹${bet.profit}
+                </span>
               </div>
             `;
             cards.appendChild(card);
@@ -305,16 +488,9 @@
             dayBetsCount++;
           });
 
-          const dayStats = document.createElement('div');
-          dayStats.className = 'flex gap-4 mb-2';
-          
-          const dayProfitEl = document.createElement('div');
-          dayProfitEl.className = 'text-yellow-300 text-sm';
-          dayProfitEl.textContent = `Day Profit: ₹${dayProfit.toFixed(2)}`;
-          
-          const dayBetsEl = document.createElement('div');
-          dayBetsEl.className = 'text-blue-300 text-sm';
-          dayBetsEl.textContent = `Bets: ${dayBetsCount}`;
+          dayProfitEl.querySelector('div:nth-child(2)').textContent = `₹${dayProfit.toFixed(2)}`;
+          dayProfitEl.querySelector('div:nth-child(2)').className = `text-lg font-medium ${dayProfit >= 0 ? 'text-green-400' : 'text-red-400'}`;
+          dayBetsEl.querySelector('div:nth-child(2)').textContent = `${dayBetsCount}`;
 
           totalProfit += dayProfit;
           monthProfit += dayProfit;
@@ -329,8 +505,10 @@
           list.appendChild(dayGroup);
         });
 
-        monthProfitEl.textContent = `Month Profit: ₹${monthProfit.toFixed(2)}`;
-        monthBetsEl.textContent = `Total Bets: ${monthBetsCount}`;
+        monthProfitEl.querySelector('div:nth-child(2)').textContent = `₹${monthProfit.toFixed(2)}`;
+        monthProfitEl.querySelector('div:nth-child(2)').className = `text-xl font-bold ${monthProfit >= 0 ? 'text-green-400' : 'text-red-400'}`;
+        monthBetsEl.querySelector('div:nth-child(2)').textContent = `${monthBetsCount}`;
+        
         monthStats.appendChild(monthProfitEl);
         monthStats.appendChild(monthBetsEl);
         monthDiv.appendChild(title);
@@ -346,6 +524,8 @@
       document.getElementById('totalBets').textContent = `${totalBetsCount}`;
     }
 
+    // Initialize with today's date
+    document.getElementById('date').value = new Date().toISOString().split('T')[0];
     updateUI();
   </script>
 </body>
